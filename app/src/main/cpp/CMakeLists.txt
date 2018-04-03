@@ -6,9 +6,10 @@ cmake_minimum_required(VERSION 3.4.1)
 # configure import libs
 set(lib_DIR ${CMAKE_SOURCE_DIR})
 
-add_library(libOpenCL SHARED libopencl.c)
-target_include_directories(libOpenCL PRIVATE
+add_library(opencl SHARED libopencl.c)
+target_include_directories(opencl PRIVATE
                            ${lib_DIR}/include)
+target_link_libraries(opencl log)
 
 add_library(OpenCLDemo SHARED
             OpenCLDemo.cpp
@@ -21,5 +22,5 @@ target_include_directories(OpenCLDemo PRIVATE
 
 target_link_libraries(OpenCLDemo
                       android
-                      libOpenCL
+                      opencl
                       log)

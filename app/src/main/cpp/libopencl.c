@@ -14,42 +14,54 @@
 
 #if defined(__APPLE__) || defined(__MACOSX)
 static const char *default_so_paths[] = {
-  "libOpenCL.so",
-  "/System/Library/Frameworks/OpenCL.framework/OpenCL"
+        "libOpenCL.so",
+        "/System/Library/Frameworks/OpenCL.framework/OpenCL"
 };
 #elif defined(__ANDROID__) || defined(ANDROID)
-    #if defined(__aarch64__)
-    static const char *default_so_paths[] = {
-            "/system/lib64/libOpenCL.so",
-            "/system/vendor/lib64/libOpenCL.so",
-            "/system/vendor/lib64/egl/libGLES_mali.so",
-            "/system/vendor/lib64/libPVROCL.so",
-            "/data/data/org.pocl.libs/files/lib64/libpocl.so",
-            "libOpenCL.so"
-    };
-    #else
-    static const char *default_so_paths[] = {
-            "/system/lib/libOpenCL.so",
-            "/system/vendor/lib/libOpenCL.so",
-            "/system/vendor/lib/egl/libGLES_mali.so",
-            "/system/vendor/lib/libPVROCL.so",
-            "/data/data/org.pocl.libs/files/lib/libpocl.so",
-            "libOpenCL.so"
-    };
-    #endif
+#include <android/log.h>
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "libopencl", __VA_ARGS__))
+
+#if defined(__aarch64__)
+static const char *default_so_paths[] = {
+        "/system/lib64/libOpenCL.so",
+        "/system/lib64/egl/libGLES_mali.so",
+        "/system/lib64/libPVROCL.so",
+        "/system/vendor/lib64/libOpenCL.so",
+        "/system/vendor/lib64/egl/libGLES_mali.so",
+        "/system/vendor/lib64/libPVROCL.so",
+        "libOpenCL.so"
+};
+#else
+static const char *default_so_paths[] = {
+        "/system/lib/libOpenCL.so",
+        "/system/lib/egl/libGLES_mali.so",
+        "/system/lib/libPVROCL.so",
+        "/system/vendor/lib/libOpenCL.so",
+        "/system/vendor/lib/egl/libGLES_mali.so",
+        "/system/vendor/lib/libPVROCL.so",
+        "libOpenCL.so"
+};
+#endif
 #elif defined(_WIN32)
 static const char *default_so_paths[] = {
-  "OpenCL.dll"
+"OpenCL.dll"
 };
 #elif defined(__linux__)
 static const char *default_so_paths[] = {
-  "/usr/lib/libOpenCL.so",
-  "/usr/local/lib/libOpenCL.so",
-  "/usr/local/lib/libpocl.so",
-  "/usr/lib64/libOpenCL.so",
-  "/usr/lib32/libOpenCL.so",
-  "libOpenCL.so"
+"/usr/lib/libOpenCL.so",
+"/usr/local/lib/libOpenCL.so",
+"/usr/local/lib/libpocl.so",
+"/usr/lib64/libOpenCL.so",
+"/usr/lib32/libOpenCL.so",
+"libOpenCL.so"
 };
+#endif
+
+#ifndef LOGI
+
+#include <stdio.h>
+
+#define LOGI(...) ((int)printf(__VA_ARGS__))
 #endif
 
 static void *so_handle = NULL;
@@ -84,6 +96,7 @@ static int open_libopencl_so() {
     }
 
     if (path) {
+        LOGI("\nopen OpenCL library at %s\n", path);
         so_handle = dlopen(path, RTLD_LAZY);
         return 0;
     } else {

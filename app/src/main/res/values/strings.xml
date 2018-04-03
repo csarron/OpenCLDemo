@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">OpenCLDemo</string>
+    <string name="native_time_str">Bilateral Filter, NativeC, Processing time is</string>
+    <string name="opencl_time_str">Bilateral Filter, OpenCL, Processing time is</string>
+    <string name="original_str">Original</string>
 </resources>

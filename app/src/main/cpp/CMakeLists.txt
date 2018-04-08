@@ -1,26 +1,34 @@
-# For more information about using CMake with Android Studio, read the
-# documentation: https://d.android.com/studio/projects/add-native-code.html
-
 cmake_minimum_required(VERSION 3.4.1)
 
-# configure import libs
-set(lib_DIR ${CMAKE_SOURCE_DIR})
+set(cl_stub_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../build)
+set(CL_stub_URL "https://github.com/csarron/cl_stub/archive/master.zip")
 
-add_library(opencl SHARED libopencl.c)
-target_include_directories(opencl PRIVATE
-                           ${lib_DIR}/include)
-target_link_libraries(opencl log)
+set(cl_stub_FILE "${cl_stub_DIR}/master.zip")
+set(cl_stub_SRC "${cl_stub_DIR}/cl_stub-master")
+
+if (NOT EXISTS "${cl_stub_FILE}")
+    file(DOWNLOAD "${CL_stub_URL}" "${cl_stub_FILE}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xfz ${cl_stub_FILE}
+      WORKING_DIRECTORY ${cl_stub_DIR})
+endif()
+
+set(cl_stub_build_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../build/cl_stub_outputs)
+file(MAKE_DIRECTORY ${cl_stub_build_DIR})
+add_subdirectory(${cl_stub_SRC} ${cl_stub_build_DIR})
+add_library(libcl_stub SHARED IMPORTED)
+add_dependencies(libcl_stub gen_cl_stub_src)
+
+set_target_properties(libcl_stub PROPERTIES IMPORTED_LOCATION ${cl_stub_build_DIR}/${ANDROID_ABI}/libcl_stub.so)
 
 add_library(OpenCLDemo SHARED
             OpenCLDemo.cpp
             openCLNR.cpp
-            refNR.cpp
-            )
+            refNR.cpp)
 
 target_include_directories(OpenCLDemo PRIVATE
-                           ${lib_DIR}/include)
+                           ${cl_stub_SRC}/include)
 
 target_link_libraries(OpenCLDemo
                       android
-                      opencl
+                      libcl_stub
                       log)
